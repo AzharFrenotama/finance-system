@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Expenses;
+use App\Models\Income;
+use App\Observers\ExpenseObserver;
+use App\Observers\IncomeObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Income::observe(IncomeObserver::class);
+        Expenses::observe(ExpenseObserver::class);
     }
 }
