@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('profile_id');
-            $table->foreign('profile_id')->references('id')->on('profiles')->onDelete('cascade');
+            $table->unsignedBigInteger('category_id');
             $table->decimal('amount', 15, 2);
-            $table->string('category');
             $table->text('description')->nullable();
             $table->date('date');
             $table->timestamps();
+
+            $table->foreign('profile_id')->references('id')->on('profiles')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 
