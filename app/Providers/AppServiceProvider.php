@@ -6,6 +6,7 @@ use App\Models\Expenses;
 use App\Models\Income;
 use App\Observers\ExpenseObserver;
 use App\Observers\IncomeObserver;
+use App\Observers\MonthlyReportObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Income::observe(IncomeObserver::class);
         Expenses::observe(ExpenseObserver::class);
+
+        Income::observe(MonthlyReportObserver::class);
+        Expenses::observe(MonthlyReportObserver::class);
     }
 }

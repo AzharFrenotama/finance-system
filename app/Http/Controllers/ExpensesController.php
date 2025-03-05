@@ -9,6 +9,7 @@ class ExpensesController extends Controller
 {
     public function index()
     {
+        return Expenses::all();
         return response()->json(Expenses::with('category')->get());
     }
 

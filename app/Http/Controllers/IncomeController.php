@@ -9,6 +9,7 @@ class IncomeController extends Controller
 {
     public function index()
     {
+        return Income::all();
         return response()->json(Income::with('category')->get());
     }
 
