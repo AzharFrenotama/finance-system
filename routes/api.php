@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\IncomeController;
@@ -35,3 +36,5 @@ Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 
 Route::get('/monthly-reports', [MonthlyReportController::class, 'index']);
 Route::get('/monthly-reports/{id}', [MonthlyReportController::class, 'show']);
+
+Route::apiResource('budgets', BudgetController::class);
