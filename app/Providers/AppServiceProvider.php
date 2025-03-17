@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Budget;
 use App\Models\Expenses;
 use App\Models\Income;
 use App\Observers\BudgetObserver;
@@ -31,6 +32,6 @@ class AppServiceProvider extends ServiceProvider
         Income::observe(MonthlyReportObserver::class);
         Expenses::observe(MonthlyReportObserver::class);
 
-        Expenses::observe(BudgetObserver::class);
+        Budget::observe(BudgetObserver::class);
     }
 }
