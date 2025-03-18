@@ -32,6 +32,6 @@ class AppServiceProvider extends ServiceProvider
         Income::observe(MonthlyReportObserver::class);
         Expenses::observe(MonthlyReportObserver::class);
 
-        Budget::observe(BudgetObserver::class);
+        Expenses::observe(BudgetObserver::class);
     }
 }
