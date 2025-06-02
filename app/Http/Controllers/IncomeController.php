@@ -45,6 +45,7 @@ class IncomeController extends Controller
             'category_id' => 'exists:categories,id',
             'amount' => 'numeric|min:1',
             'description' => 'nullable|string'
+            
         ]);
 
         $incomes->update($request->all());

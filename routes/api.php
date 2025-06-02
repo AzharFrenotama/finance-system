@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExpensesController;
@@ -38,3 +39,14 @@ Route::get('/monthly-reports', [MonthlyReportController::class, 'index']);
 Route::get('/monthly-reports/{id}', [MonthlyReportController::class, 'show']);
 
 Route::apiResource('budgets', BudgetController::class);
+
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+Route::get('/profiles', [ProfileController::class, 'index']);
+Route::post('/profiles', [ProfileController::class, 'store']);
+Route::put('/profiles/{id}', [ProfileController::class, 'update']);
+Route::delete('/profiles/{id}', [ProfileController::class, 'destroy']);
+    });

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistem Manajemen Keuangan</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #1e1e2f;
+      color: #f0f0f0;
+    }
+    header {
+      background-color: #2f3e4d;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin-top: 10px;
+    }
+    nav ul li {
+      margin: 0 15px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #ccc;
+    }
+    nav ul li.active {
+      color: white;
+      border-bottom: 2px solid #fff;
+    }
+    #darkModeToggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      position: absolute;
+      top: 25px;
+      right: 20px;
+    }
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    .tab {
+      display: none;
+    }
+    .tab.active {
+      display: block;
+    }
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .card {
+      background-color: white;
+      padding: 20px;
+      flex: 1;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    body.dark .card {
+      background-color: #2b2b3b;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    form input, form select, form button {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    form button {
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    form button:hover {
+      background-color: #43a047;
+    }
+    #search {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    #daftar-transaksi {
+      list-style: none;
+    }
+    #daftar-transaksi li {
+      display: flex;
+      justify-content: space-between;
+      background-color: #f3f4f6;
+      padding: 10px 15px;
+      margin: 5px 0;
+      border-radius: 5px;
+      align-items: center;
+    }
+    body.dark #daftar-transaksi li {
+      background-color: #3a3a50;
+    }
+    .income {
+      color: green;
+      font-weight: bold;
+    }
+    .expense {
+      color: red;
+      font-weight: bold;
+    }
+    #daftar-transaksi button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #daftar-transaksi button:hover {
+      opacity: 0.7;
+    }
+    .notifikasi {
+      position: fixed;
+      top: 20px;
+      right: -300px;
+      background: #4caf50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: right 0.5s ease;
+      z-index: 1000;
+    }
+    .notifikasi.show {
+      right: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sistem Manajemen Keuangan Pribadi</h1>
+    <nav>
+      <ul>
+        <li data-tab="dashboard" class="active">Dashboard</li>
+        <li data-tab="transaksi">Transaksi</li>
+        <li data-tab="anggaran">Anggaran</li>
+        <li data-tab="laporan">Laporan</li>
+      </ul>
+      <button id="darkModeToggle">🌓</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="dashboard" class="tab active">
+      <div class="summary">
+        <div class="card"><h3>Saldo</h3><p id="saldo">Rp 0</p></div>
+        <div class="card"><h3>Pemasukan</h3><p id="pemasukan">Rp 0</p></div>
+        <div class="card"><h3>Pengeluaran</h3><p id="pengeluaran">Rp 0</p></div>
+      </div>
+    </section>
+
+    <section id="transaksi" class="tab">
+      <h2>Catat Transaksi</h2>
+      <form id="form-transaksi">
+        <input type="text" id="nama" placeholder="Nama Transaksi" required />
+        <input type="number" id="jumlah" placeholder="Jumlah (Rp)" required />
+        <select id="tipe" required>
+          <option value="">Pilih Tipe</option>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+        <input type="date" id="tanggal" required />
+        <button type="submit">Tambah</button>
+      </form>
+      <input type="text" id="search" placeholder="Cari transaksi..." />
+      <ul id="daftar-transaksi"></ul>
+    </section>
+
+    <section id="anggaran" class="tab">
+      <h2>Fitur Anggaran</h2>
+      <p>Fitur ini akan menampilkan pengelolaan dan batas pengeluaran berdasarkan kategori.</p>
+    </section>
+
+    <section id="laporan" class="tab">
+      <h2>Laporan Keuangan</h2>
+      <canvas id="grafikLaporan" height="100"></canvas>
+    </section>
+  </main>
+
+  <div id="notifikasi" class="notifikasi">Berhasil!</div>
+
+  <script>
+    const tabs = document.querySelectorAll("nav ul li");
+    const tabContents = document.querySelectorAll(".tab");
+    const form = document.getElementById("form-transaksi");
+    const daftarTransaksi = document.getElementById("daftar-transaksi");
+    const searchInput = document.getElementById("search");
+    const notifikasi = document.getElementById("notifikasi");
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const chartCanvas = document.getElementById("grafikLaporan");
+
+    let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+    let chart;
+
+    function setupTabs() {
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+
+          tabContents.forEach(c => c.classList.remove("active"));
+          document.getElementById(tab.dataset.tab).classList.add("active");
+
+          if (tab.dataset.tab === "laporan") updateChart();
+        });
+      });
+    }
+
+    function render() {
+      daftarTransaksi.innerHTML = "";
+      const filtered = transaksi.filter(t =>
+        t.nama.toLowerCase().includes(searchInput.value.toLowerCase())
+      );
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      filtered.forEach((t, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span>${t.nama} - Rp ${t.jumlah.toLocaleString("id-ID")}</span>
+          <span>
+            <span class="${t.tipe === "Income" ? "income" : "expense"}">${t.tipe}</span>
+            <button onclick="edit(${i})" title="Edit Transaksi" style="margin-left:10px;">✏️</button>
+            <button onclick="hapus(${i})" title="Hapus Transaksi" style="margin-left:10px;">❌</button>
+          </span>
+        `;
+        daftarTransaksi.appendChild(li);
+
+        if (t.tipe === "Income") totalIncome += t.jumlah;
+        else totalExpense += t.jumlah;
+      });
+
+      document.getElementById("pemasukan").textContent = `Rp ${totalIncome.toLocaleString("id-ID")}`;
+      document.getElementById("pengeluaran").textContent = `Rp ${totalExpense.toLocaleString("id-ID")}`;
+      document.getElementById("saldo").textContent = `Rp ${(totalIncome - totalExpense).toLocaleString("id-ID")}`;
+    }
+
+    function addTransactionHandler(e) {
+      e.preventDefault();
+
+      const nama = document.getElementById("nama").value.trim();
+      const jumlah = parseFloat(document.getElementById("jumlah").value);
+      const tipe = document.getElementById("tipe").value;
+      const tanggal = document.getElementById("tanggal").value;
+
+      if (!nama || isNaN(jumlah) || jumlah <= 0 || !tipe || !tanggal) {
+        alert("Mohon isi semua data dengan benar.");
+        return;
+      }
+
+      transaksi.push({ nama, jumlah, tipe, tanggal });
+      saveAndRender();
+
+      form.reset();
+      showNotifikasi("Transaksi ditambahkan!");
+    }
+
+    function hapus(index) {
+      if (confirm("Yakin ingin menghapus transaksi ini?")) {
+        transaksi.splice(index, 1);
+        saveAndRender();
+        showNotifikasi("Transaksi dihapus!");
+      }
+    }
+
+    function edit(index) {
+      const t = transaksi[index];
+      document.getElementById("nama").value = t.nama;
+      document.getElementById("jumlah").value = t.jumlah;
+      document.getElementById("tipe").value = t.tipe;
+      document.getElementById("tanggal").value = t.tanggal;
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = "Simpan";
+      form.removeEventListener("submit", addTransactionHandler);
+
+      form.addEventListener("submit", function saveEdit(e) {
+        e.preventDefault();
+
+        transaksi[index] = {
+          nama: document.getElementById("nama").value.trim(),
+          jumlah: parseFloat(document.getElementById("jumlah").value),
+          tipe: document.getElementById("tipe").value,
+          tanggal: document.getElementById("tanggal").value,
+        };
+
+        if (!transaksi[index].nama || isNaN(transaksi[index].jumlah) || transaksi[index].jumlah <= 0 ||
+            !transaksi[index].tipe || !transaksi[index].tanggal) {
+          alert("Mohon isi semua data dengan benar.");
+          return;
+        }
+
+        saveAndRender();
+        form.reset();
+        submitBtn.textContent = "Tambah";
+        form.removeEventListener("submit", saveEdit);
+        form.addEventListener("submit", addTransactionHandler);
+        showNotifikasi("Transaksi diperbarui!");
+      }, { once: true });
+    }
+
+    function saveAndRender() {
+      localStorage.setItem("transaksi", JSON.stringify(transaksi));
+      render();
+    }
+
+    function showNotifikasi(pesan) {
+      notifikasi.textContent = pesan;
+      notifikasi.classList.add("show");
+      setTimeout(() => notifikasi.classList.remove("show"), 3000);
+    }
+
+    function setupDarkModeToggle() {
+      darkModeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+      });
+    }
+
+    function updateChart() {
+      const income = transaksi.filter(t => t.tipe === "Income").reduce((a, b) => a + b.jumlah, 0);
+      const expense = transaksi.filter(t => t.tipe === "Expense").reduce((a, b) => a + b.jumlah, 0);
+
+      if (chart) chart.destroy();
+      chart = new Chart(chartCanvas, {
+        type: "doughnut",
+        data: {
+          labels: ["Pemasukan", "Pengeluaran"],
+          datasets: [{
+            data: [income, expense],
+            backgroundColor: ["#4caf50", "#f44336"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom"
+            }
+          }
+        }
+      });
+    }
+
+    function setupSearchFilter() {
+      searchInput.addEventListener("input", render);
+    }
+
+    function init() {
+      setupTabs();
+      setupDarkModeToggle();
+      setupSearchFilter();
+      form.addEventListener("submit", addTransactionHandler);
+      render();
+    }
+
+    init();
+    window.edit = edit;
+    window.hapus = hapus;
+  </script>
+</body>
+</html>

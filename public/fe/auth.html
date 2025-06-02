@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login & Register Laravel API</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2.5rem 2rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 420px;
+      transition: 0.3s ease;
+    }
+
+    .form {
+      display: none;
+      flex-direction: column;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .form.active {
+      display: flex;
+    }
+
+    .form-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #444;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    .form-options {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .form-options label {
+      color: #333;
+    }
+
+    .btn {
+      padding: 0.75rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    .switch-link {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: 0.95rem;
+    }
+
+    .switch-link span {
+      color: #007bff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Login Form -->
+    <form id="loginForm" class="form active" novalidate>
+      <h2 class="form-title">Selamat Datang Kembali 👋</h2>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="Masukkan Email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Masukkan Password" required>
+      </div>
+      <div class="form-options">
+        <label><input type="checkbox" id="rememberMe"> Ingatkan Saya</label>
+      </div>
+      <button type="submit" class="btn">Masuk</button>
+      <p class="switch-link">Belum punya akun? <span id="goToRegister">Daftar sekarang</span></p>
+    </form>
+
+    <!-- Register Form -->
+    <form id="registerForm" class="form" novalidate>
+      <h2 class="form-title">Buat Akun Baru 📝</h2>
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="regName" placeholder="Masukkan Nama Lengkap" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="Masukkan Email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="Buat Password" required>
+      </div>
+      <div class="form-group">
+        <label>Konfirmasi Password</label>
+        <input type="password" id="confirmPassword" placeholder="Ulangi Password" required>
+      </div>
+      <div class="form-options">
+        <label><input type="checkbox" id="terms"> Saya setuju dengan syarat dan ketentuan</label>
+      </div>
+      <button type="submit" class="btn">Daftar</button>
+      <p class="switch-link">Sudah punya akun? <span id="goToLogin">Masuk</span></p>
+    </form>
+  </div>
+
+<script>
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const goToRegister = document.getElementById('goToRegister');
+  const goToLogin = document.getElementById('goToLogin');
+
+  goToRegister.addEventListener('click', () => {
+    loginForm.classList.remove('active');
+    registerForm.classList.add('active');
+  });
+
+  goToLogin.addEventListener('click', () => {
+    registerForm.classList.remove('active');
+    loginForm.classList.add('active');
+  });
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const remember = document.getElementById('rememberMe').checked;
+
+    if (!remember) {
+      alert('Silakan centang kotak "Ingatkan Saya" terlebih dahulu.');
+      return;
+    }
+
+    fetch('http://127.0.0.1:8000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.token) {
+        alert('Login berhasil!');
+        localStorage.setItem('authToken', data.token);
+        // Arahkan ke halaman index.html setelah login sukses
+        window.location.href = 'index.html';
+      } else {
+        alert('Login gagal. Cek kembali email dan password.');
+      }
+    })
+    .catch(() => alert('Terjadi kesalahan saat login.'));
+  });
+
+  registerForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const terms = document.getElementById('terms').checked;
+
+    if (!terms) {
+      alert('Anda harus menyetujui syarat dan ketentuan.');
+      return;
+    }
+
+    if (password !== confirm) {
+      alert('Password dan konfirmasi tidak cocok.');
+      return;
+    }
+
+    fetch('http://127.0.0.1:8000/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        password_confirmation: confirm
+      })
+    })
+    .then(res => res.json())
+    .then(() => {
+      alert('Pendaftaran berhasil! Silakan login.');
+      registerForm.reset();
+      registerForm.classList.remove('active');
+      loginForm.classList.add('active');
+    })
+    .catch(() => alert('Terjadi kesalahan saat mendaftar.'));
+  });
+</script>
+
+</body>
+</html>
